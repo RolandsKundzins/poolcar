@@ -1,7 +1,16 @@
 export default function App() {
-    return (
-      <div>
-        <h1>hello, here I plan to create the map</h1>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <iframe
+      width="600"
+      height="450"
+      // style="border:0"
+      loading="lazy"
+      allowfullscreen
+      referrerpolicy="no-referrer-when-downgrade"
+      src="https://www.google.com/maps/embed/v1/place?key=API_KEY
+        &q=Space+Needle,Seattle+WA">
+    </iframe>
+    </div>
+  );
+}
