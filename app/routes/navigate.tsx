@@ -1,16 +1,21 @@
-export default function App() {
+import { useMemo } from "react";
+import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
+
+export default function Home() {
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: "AIzaSyAm6YQArZ7RCT3WgjV_GP7g73Pm8kHMBxg",
+  });
+
+  if (!isLoaded) return <div>Loading...</div>;
+  return <Map />;
+}
+
+function Map() {
+  const center = useMemo(() => ({ lat: 44, lng: -80 }), []);
+
   return (
-    <div>
-      <iframe
-      width="600"
-      height="450"
-      // style="border:0"
-      loading="lazy"
-      allowfullscreen
-      referrerpolicy="no-referrer-when-downgrade"
-      src="https://www.google.com/maps/embed/v1/place?key=API_KEY
-        &q=Space+Needle,Seattle+WA">
-    </iframe>
-    </div>
+    <GoogleMap zoom={10} center={center} mapContainerClassName="map-container">
+      <Marker position={center} />
+    </GoogleMap>
   );
 }
