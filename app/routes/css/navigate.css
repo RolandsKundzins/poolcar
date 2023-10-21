@@ -10,4 +10,16 @@ body {
 .map-container {
   height: 100vh; /* Set an appropriate height for the map */
   width: 100%; /* Set an appropriate width for the map */
+  position: relative; /* Set the position of the map container to relative */
+}
+
+
+.input-box {
+  position: absolute; /* Set the position of the input box to absolute */
+  top: 20px; /* Adjust the top distance from the top edge of the map container */
+  left: 20px; /* Adjust the left distance from the left edge of the map container */
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 1; /* Ensure the input box is above the map */
 }
