@@ -9,8 +9,11 @@ import "./css/navigate.css"
 import { Form } from "@remix-run/react";
 import polyline from "google-polyline"
 
-const MAPS_API_KEY = "AIzaSyAm6YQArZ7RCT3WgjV_GP7g73Pm8kHMBxg";
+/*go to https://console.cloud.google.com/google/maps-apis and get api key
+You need to enable javascript maps api and directions api*/
+const MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
 
+/*Calculate distance between two points using manhatan distance algorithm*/
 function calculateManhattanDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const latDistance = Math.abs(lat2 - lat1);
   const lonDistance = Math.abs(lon2 - lon1);
@@ -37,7 +40,7 @@ async function getLatLngFromAddress(address: string): Promise<{ lat: number; lng
   }
 }
 
-
+/*The main component*/
 export default function Home() {
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: MAPS_API_KEY,
@@ -50,25 +53,27 @@ export default function Home() {
       <Map />
     </div>
   )
-
 }
 
+/*Map component*/
 function Map() {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [distance, setDistance] = useState('');
   const [duration, setDuration] = useState('');
 
+  const [distanceHitchHiker, setDistanceHitchHiker] = useState('');
+  const [durationHitchHiker, setDurationHitchHiker] = useState('');
+
   const originRef = useRef<HTMLInputElement>(null);
   const destinationRef = useRef<HTMLInputElement>(null);
   const hitchhikerOriginRef = useRef<HTMLInputElement>(null);
 
-  
+  /*center the map to Riga*/
   const center = useMemo(() => ({ lat: 56.946285, lng: 24.105078 }), []);
 
   const directionsService = new google.maps.DirectionsService();
   const directionsRenderer = new google.maps.DirectionsRenderer();
   const secondDirectionsRenderer = new google.maps.DirectionsRenderer();
-
 
 
   async function calcRoute() {
@@ -83,6 +88,8 @@ function Map() {
       destination: destination,
       travelMode: google.maps.TravelMode.DRIVING
     };
+
+    /*Create the route*/
     directionsService.route(request, function(response, status) {
       if (status === "OK") {
         let waypoints;
@@ -90,11 +97,10 @@ function Map() {
           waypoints = polyline.decode(response?.routes[0].overview_polyline)
 
           let closestDistance = Number.MAX_VALUE, closestLatitude, closestLongtitude;
-          
+          //get closest point from hitchiker to the route of the driver
           for(const path_element of waypoints){
             let latitude = path_element[0];
             let longtitude = path_element[1];
-            // console.log(`${latitude}, ${longtitude}`)
 
             const distance = calculateManhattanDistance(latitude, longtitude, hitchhikerLatLng.lat, hitchhikerLatLng.lng)
 
@@ -105,22 +111,19 @@ function Map() {
             }
           }
           if (closestLatitude !== undefined && closestLongtitude !== undefined) {
-            // setClosestCoordinates({ lat: closestLatitude, lng: closestLongtitude });
-            // console.log("hi")
-            // const startLat = waypoints[0][0], startLng = waypoints[0][1];
-            // const endLat = waypoints[waypoints.length-1][0], endLng = waypoints[waypoints.length-1][1];
-            // console.log(`startLat: ${startLat}, startLng: ${startLng}, endLat: ${endLat}, endLng: ${endLng}`) //
-            console.log(`closest distance: ${closestDistance}km, closestLatitude: ${closestLatitude}, closestLongtitude: ${closestLongtitude}`)
-
             var request2 = {
               origin: hitchhikeraddress,
               destination: `${closestLatitude} ${closestLongtitude}`,
-              travelMode: google.maps.TravelMode.DRIVING
+              travelMode: google.maps.TravelMode.WALKING
             };
 
+            /*Create the route for hitchiker to closest point*/
             directionsService.route(request2, function(response2, status2) {
               secondDirectionsRenderer.setDirections(response2);
               secondDirectionsRenderer.setMap(map);
+
+              setDistanceHitchHiker(response2?.routes[0]?.legs[0]?.distance?.text || '');
+              setDurationHitchHiker(response2?.routes[0]?.legs[0]?.duration?.text || '');
             });
 
           }
@@ -147,8 +150,8 @@ function Map() {
           <button onClick={calcRoute}>Calculate Route</button>
         </Form>
         <div>
-          {distance && (<p><b>Distance</b> {distance}</p>)}
-          {duration && (<p><b>Duration</b> {duration}</p>)}
+          {distance && (<p><b>For driver:</b> {distance}, {duration}</p>)}
+          {distance && (<p><b>For hitchiker:</b> {distanceHitchHiker}, {durationHitchHiker}</p>)}
         </div>
       </div>
 
@@ -157,6 +160,7 @@ function Map() {
         center={center} 
         mapContainerClassName="map-container"
         options={{
+          //don't show any of the controls
           zoomControl: false,
           streetViewControl: false,
           mapTypeControl: false,
@@ -164,7 +168,6 @@ function Map() {
         }}
         onLoad={(map) => setMap(map)}
       >
-        {/* <MarkerF position={closestCoordinates} /> */}
       </GoogleMap>
     </div>
   );
