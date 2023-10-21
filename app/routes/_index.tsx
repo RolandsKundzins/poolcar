@@ -1,5 +1,4 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -12,17 +11,29 @@ export default function Index() {
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
       <h1>Welcome to Remix</h1>
-      <h2>Pagaidām pievienoju šādi linkus  uz visām lapām, lai var visas lapas apskatīties</h2>
-      <h3>Drošvien, ka ka pirmajai lapai vajadzēs būt signin/login, nevis šajai.</h3>
       <ul>
         <li>
-          <Link to="/login">Login</Link>;
+          <a
+            target="_blank"
+            href="https://remix.run/tutorials/blog"
+            rel="noreferrer"
+          >
+            15m Quickstart Blog Tutorial
+          </a>
         </li>
         <li>
-          <Link to="/signin">Signin</Link>;
+          <a
+            target="_blank"
+            href="https://remix.run/tutorials/jokes"
+            rel="noreferrer"
+          >
+            Deep Dive Jokes App Tutorial
+          </a>
         </li>
         <li>
-          <Link to="/navigate">Navigate</Link>;
+          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
+            Remix Docs
+          </a>
         </li>
       </ul>
     </div>
