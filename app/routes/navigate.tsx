@@ -57,8 +57,6 @@ function Map() {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [distance, setDistance] = useState('');
   const [duration, setDuration] = useState('');
-  const [closestCoordinates, setClosestCoordinates] = useState<{ lat: number, lng: number } | null>(null);
-
 
   const originRef = useRef<HTMLInputElement>(null);
   const destinationRef = useRef<HTMLInputElement>(null);
@@ -69,6 +67,8 @@ function Map() {
 
   const directionsService = new google.maps.DirectionsService();
   const directionsRenderer = new google.maps.DirectionsRenderer();
+  const secondDirectionsRenderer = new google.maps.DirectionsRenderer();
+
 
 
   async function calcRoute() {
@@ -76,6 +76,8 @@ function Map() {
     const destination = destinationRef.current?.value || "";
     const hitchhikeraddress = hitchhikerOriginRef.current?.value || "";
     const hitchhikerLatLng = await getLatLngFromAddress(hitchhikeraddress);
+    console.log(`${hitchhikerLatLng.lat}, ${hitchhikerLatLng.lng}`)
+
     var request = {
       origin: origin,
       destination: destination,
@@ -87,34 +89,44 @@ function Map() {
         if(response?.routes[0].overview_polyline){
           waypoints = polyline.decode(response?.routes[0].overview_polyline)
 
-          let minDistance = Number.MAX_VALUE, closestLatitude, closestLongtitude;
+          let closestDistance = Number.MAX_VALUE, closestLatitude, closestLongtitude;
           
           for(const path_element of waypoints){
             let latitude = path_element[0];
             let longtitude = path_element[1];
+            // console.log(`${latitude}, ${longtitude}`)
 
             const distance = calculateManhattanDistance(latitude, longtitude, hitchhikerLatLng.lat, hitchhikerLatLng.lng)
-            // console.log(`distance: ${distance} km`)
 
-            if(distance < minDistance) {
-              minDistance = distance;
+            if(distance < closestDistance) {
+              closestDistance = distance;
               closestLatitude = latitude;
               closestLongtitude = longtitude;
             }
-
-            // console.log(`lat: ${latitude}, lon: ${longtitude}`)
           }
           if (closestLatitude !== undefined && closestLongtitude !== undefined) {
-            setClosestCoordinates({ lat: closestLatitude, lng: closestLongtitude });
-            console.log("hi")
+            // setClosestCoordinates({ lat: closestLatitude, lng: closestLongtitude });
+            // console.log("hi")
+            // const startLat = waypoints[0][0], startLng = waypoints[0][1];
+            // const endLat = waypoints[waypoints.length-1][0], endLng = waypoints[waypoints.length-1][1];
+            // console.log(`startLat: ${startLat}, startLng: ${startLng}, endLat: ${endLat}, endLng: ${endLng}`) //
+            console.log(`closest distance: ${closestDistance}km, closestLatitude: ${closestLatitude}, closestLongtitude: ${closestLongtitude}`)
+
+            var request2 = {
+              origin: hitchhikeraddress,
+              destination: `${closestLatitude} ${closestLongtitude}`,
+              travelMode: google.maps.TravelMode.DRIVING
+            };
+
+            directionsService.route(request2, function(response2, status2) {
+              secondDirectionsRenderer.setDirections(response2);
+              secondDirectionsRenderer.setMap(map);
+            });
+
           }
-          console.log(`startLat: ${waypoints[0][0]}, startLng: ${waypoints[0][1]}, endLat: ${waypoints[waypoints.length-1][0]}, startLat: ${waypoints[waypoints.length-1][0]}`)
-          console.log(`closest distance: ${minDistance}, closestLatitude: ${closestLatitude}, closestLongtitude: ${closestLongtitude}`)
         }
 
         
-        // console.log(response?.routes[0].overview_polyline);
-        // console.log(response?.routes[0].overview_path[0].lng());
         directionsRenderer.setDirections(response);
         directionsRenderer.setMap(map);
         setDistance(response?.routes[0]?.legs[0]?.distance?.text || '');
@@ -129,9 +141,9 @@ function Map() {
     <div>
       <div className="input-box">
         <Form>
-          <input type="text" placeholder="Origin" ref={originRef} value="ulbroka"/>
-          <input type="text" placeholder="Destination" ref={destinationRef} value="jelgavas iela 1"/>
-          <input type="text" placeholder="Hitchhiker Origin" ref={hitchhikerOriginRef} value="saulīši"/>
+          <input type="text" placeholder="Origin" ref={originRef} />
+          <input type="text" placeholder="Destination" ref={destinationRef} />
+          <input type="text" placeholder="Hitchhiker Origin" ref={hitchhikerOriginRef} />
           <button onClick={calcRoute}>Calculate Route</button>
         </Form>
         <div>
@@ -152,7 +164,6 @@ function Map() {
         }}
         onLoad={(map) => setMap(map)}
       >
-        {closestCoordinates && <MarkerF position={closestCoordinates} />}
         {/* <MarkerF position={closestCoordinates} /> */}
       </GoogleMap>
     </div>
