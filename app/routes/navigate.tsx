@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from "react";
-import type {ActionFunction} from "@remix-run/node"
+// import type {ActionFunction} from "@remix-run/node"
 import { 
   GoogleMap, 
   useLoadScript, 
   MarkerF, 
   Autocomplete 
 } from "@react-google-maps/api";
-import "./css/navigate.css"
+import "./styles/navigate.css"
 import { Form, useLoaderData } from "@remix-run/react";
 import polyline from "google-polyline"
 import { authenticator } from "utils/auth.server";
