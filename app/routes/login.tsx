@@ -2,6 +2,7 @@ import type {ActionFunction} from "@remix-run/node"
 import {Form, Link} from "@remix-run/react"
 import {authenticator} from "utils/auth.server"
 
+
 const loader = async ({request}: any) => {
   console.log(`login.tsx loader`)
   const user = await authenticator.isAuthenticated(request, {

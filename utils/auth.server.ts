@@ -8,17 +8,17 @@ import { RowDataPacket } from 'mysql2';
 
 
 export interface UsersRecord {
-  user_id: number;
-  login: string | null;
+  // user_id: number;
+  // login: string | null;
   password: string;
-  phone_number: string | null;
-  name: string | null;
-  surname: string | null;
+  // phone_number: string | null;
+  // name: string | null;
+  // surname: string | null;
   email: string;
-  age: string | null;
-  country: string | null;
-  score: string | null;
-  score_divided_by: string | null;
+  // age: string | null;
+  // country: string | null;
+  // score: string | null;
+  // score_divided_by: string | null;
 }
 
 
@@ -32,10 +32,10 @@ const formStrategy = new FormStrategy(async ({form}) => {
 
   const queryParams = [];
   queryParams.push(email);
-  const query = "SELECT * FROM USERS WHERE EMAIL = ? LIMIT 1";
+  const query = "SELECT email, password FROM USERS WHERE EMAIL = ? LIMIT 1";
   const [rows] = await pool.query<RowDataPacket[]>(query, queryParams);
   const user = rows[0] as UsersRecord; // Extract the first row as UsersRecord
-  console.log(`user: ${JSON.stringify(user, null, 2)}`);
+  console.log(`formStrategy user: ${JSON.stringify(user, null, 2)}`);
 
   if (!user) {
     console.log("wrong email")

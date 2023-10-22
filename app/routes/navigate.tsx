@@ -16,7 +16,7 @@ You need to enable javascript maps api and directions api*/
 const MAPS_API_KEY = "AIzaSyAm6YQArZ7RCT3WgjV_GP7g73Pm8kHMBxg";
 
 
-const loader = async ({request}: any) => {
+export async function loader({request}: any) {
   console.log(`navigate.tsx loader`)
   const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
@@ -30,12 +30,11 @@ const loader = async ({request}: any) => {
   return user
 }
 
-const action: ActionFunction = async ({request}: any) => {
+export async function action({request}: any) {
   const user = await authenticator.isAuthenticated(request, {
       failureRedirect: "/login",
   })
 
-  // const xata = getXataClient()
   const form = await request.formData()
   const action = form.get("action")
 
@@ -80,7 +79,7 @@ async function getLatLngFromAddress(address: string): Promise<{ lat: number; lng
 /*The main component*/
 export default function Home() {
   const user = useLoaderData<typeof loader>();
-  console.log(`Home user: ${user}`);
+  console.log(`Home user: ${JSON.stringify(user, null, 2)}`);
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: MAPS_API_KEY,
     libraries: ['places'],
@@ -89,18 +88,20 @@ export default function Home() {
   if (!isLoaded) return <div>Loading...</div>;
   return(
     <div>
-      {/* {user ? ( */}
-        <Form method="post">
-          <button
-            type="submit"
-            name="action"
-            value="logout"
-            className="bg-white text-black border-2 border-black py-1 px-3 rounded-md font-semibold"
-          >
-            Logout
-          </button>
-        </Form>
-      {/* ) : null} */}
+      {user ? (
+        <div className="navigation-btns">
+          <Form method="post">
+            <button
+              type="submit"
+              name="action"
+              value="logout"
+              className="bg-white text-black border-2 border-black py-1 px-3 rounded-md font-semibold"
+            >
+              Logout
+            </button>
+          </Form>
+        </div>
+      ) : null}
       <Map />
     </div>
   )
