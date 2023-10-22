@@ -17,7 +17,7 @@ export default function Index() {
           <Link to="/login">login</Link>;
         </li>
         <li>
-          <Link to="/signin">signin</Link>;
+          <Link to="/signup">signup</Link>;
         </li>
         <li>
           <Link to="/navigate">navigate</Link>;
