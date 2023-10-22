@@ -1,5 +1,6 @@
 import {createCookieSessionStorage} from "@remix-run/node"
 
+console.log("session.server.ts")
 if(!process.env.SESSION_SECRET){
     throw new Error("Session secret is required")
 }

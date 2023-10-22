@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import type {ActionFunction} from "@remix-run/node"
 import { 
   GoogleMap, 
   useLoadScript, 
@@ -6,12 +7,48 @@ import {
   Autocomplete 
 } from "@react-google-maps/api";
 import "./css/navigate.css"
-import { Form } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import polyline from "google-polyline"
+import { authenticator } from "utils/auth.server";
 
 /*go to https://console.cloud.google.com/google/maps-apis and get api key
 You need to enable javascript maps api and directions api*/
-const MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
+const MAPS_API_KEY = "AIzaSyAm6YQArZ7RCT3WgjV_GP7g73Pm8kHMBxg";
+
+
+const loader = async ({request}: any) => {
+  console.log(`navigate.tsx loader`)
+  const user = await authenticator.isAuthenticated(request, {
+      failureRedirect: "/login",
+  })
+  console.log(`navigate loader user: ${user}`);
+
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  return user
+}
+
+const action: ActionFunction = async ({request}: any) => {
+  const user = await authenticator.isAuthenticated(request, {
+      failureRedirect: "/login",
+  })
+
+  // const xata = getXataClient()
+  const form = await request.formData()
+  const action = form.get("action")
+
+  switch (action) {
+    case "logout": {
+      return await authenticator.logout(request, {redirectTo: "/login"})
+    }
+
+    default:
+      return null
+  }
+}
+
 
 /*Calculate distance between two points using manhatan distance algorithm*/
 function calculateManhattanDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -42,6 +79,8 @@ async function getLatLngFromAddress(address: string): Promise<{ lat: number; lng
 
 /*The main component*/
 export default function Home() {
+  const user = useLoaderData<typeof loader>();
+  console.log(`Home user: ${user}`);
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: MAPS_API_KEY,
     libraries: ['places'],
@@ -50,6 +89,18 @@ export default function Home() {
   if (!isLoaded) return <div>Loading...</div>;
   return(
     <div>
+      {/* {user ? ( */}
+        <Form method="post">
+          <button
+            type="submit"
+            name="action"
+            value="logout"
+            className="bg-white text-black border-2 border-black py-1 px-3 rounded-md font-semibold"
+          >
+            Logout
+          </button>
+        </Form>
+      {/* ) : null} */}
       <Map />
     </div>
   )
